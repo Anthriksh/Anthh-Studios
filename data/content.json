@@ -1,0 +1,79 @@
+{
+  "artist": {
+    "name": "ANTHH",
+    "roles": "ARTIST · GUITARIST · SINGER · SONGWRITER",
+    "tagline": "WHAT I COULDN'T SAY.",
+    "bio": "Some things are easier to play than explain.",
+    "about": "I play guitar, sing, write songs and keep collecting the little moments that turn into music.",
+    "heroImage": "/images/hero.png",
+    "storyImage": "/images/acoustic.png",
+    "musicIntro": "Originals, covers, demos and late-night ideas.",
+    "guitarsIntro": "Every instrument leaves a little of itself in the music.",
+    "instagram": "",
+    "youtube": "",
+    "spotify": "",
+    "hometown": "",
+    "basedIn": "Hyderabad, India",
+    "education": "B.Tech — CSE (AI & ML)",
+    "educationDetail": "Student, building a creative life alongside technology.",
+    "journey": "I started with the guitar, then found my way into singing, songwriting and recording. I am interested in the space where technology and music meet — making things, learning constantly and turning ideas into work people can feel.",
+    "future": "My goal is to grow into a professional recording artist and songwriter, work with serious musicians and producers, release original music, and build a body of work that feels unmistakably mine.",
+    "producerPitch": "If you are a producer, artist, composer, studio or creative team looking for a guitarist, vocalist, songwriter or a hungry collaborator, I am open to conversations, sessions and collaborations.",
+    "skills": "Guitar · Vocals · Songwriting · Recording · Creative Direction",
+    "contactEmail": ""
+  },
+  "music": [],
+  "guitars": [
+    {
+      "id": "guitar-01",
+      "name": "STRYDOM MAGMA ST30M",
+      "type": "ELECTRIC",
+      "description": "The electric guitar behind sessions, experiments and questionable decisions.",
+      "image": "/images/guitar-detail.jpeg",
+      "specs": "Electric · 6-string"
+    },
+    {
+      "id": "guitar-02",
+      "name": "ACOUSTIC",
+      "type": "ACOUSTIC",
+      "description": "The guitar that belongs in rooftops, rooms and quiet evenings.",
+      "image": "/images/acoustic.png",
+      "specs": "Acoustic · 6-string"
+    }
+  ],
+  "archive": [
+    {
+      "id": "archive-01",
+      "title": "Friday as usual.",
+      "type": "RECENT",
+      "description": "Little moments become memories. The archive is where they stay.",
+      "image": "/images/friday.png",
+      "mediaType": "IMAGE",
+      "featured": true
+    },
+    {
+      "id": "archive-02",
+      "title": "Electric / editorial",
+      "type": "PORTRAIT",
+      "description": "A closer look at the instrument behind the sound.",
+      "image": "/images/guitar-detail.jpeg",
+      "mediaType": "IMAGE",
+      "featured": true
+    }
+  ],
+  "currently": {
+    "playing": "",
+    "listeningTo": "",
+    "writing": "",
+    "recording": ""
+  },
+  "media": [
+    {
+      "ok": true,
+      "url": "/uploads/875d3633-25f7-41ab-90af-57e60c3119e8.mp4",
+      "name": "WhatsApp Video 2026-10-01 at 21.08.41.mp4",
+      "type": "video/mp4",
+      "kind": "VIDEO"
+    }
+  ]
+}
