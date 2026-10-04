@@ -3,6 +3,7 @@
 import { startRegistration } from "@simplewebauthn/browser";
 import { useEffect, useState } from "react";
 import { getSupabaseBrowserClient } from "../lib/supabase-browser";
+
 const emptyContent = {
   artist: {
     name: "ANTHH",
@@ -29,15 +30,18 @@ const emptyContent = {
       "Guitar · Vocals · Songwriting · Recording · Creative Direction",
     contactEmail: "",
   },
+
   music: [],
   guitars: [],
   archive: [],
+
   currently: {
     playing: "",
     listeningTo: "",
     writing: "",
     recording: "",
   },
+
   media: [],
 };
 
@@ -47,6 +51,7 @@ function normalizeContent(data) {
   return {
     ...emptyContent,
     ...data,
+
     artist: {
       ...emptyContent.artist,
       ...artist,
@@ -55,14 +60,27 @@ function normalizeContent(data) {
         artist.hero ??
         emptyContent.artist.tagline,
     },
-    music: Array.isArray(data?.music) ? data.music : [],
-    guitars: Array.isArray(data?.guitars) ? data.guitars : [],
-    archive: Array.isArray(data?.archive) ? data.archive : [],
+
+    music: Array.isArray(data?.music)
+      ? data.music
+      : [],
+
+    guitars: Array.isArray(data?.guitars)
+      ? data.guitars
+      : [],
+
+    archive: Array.isArray(data?.archive)
+      ? data.archive
+      : [],
+
     currently: {
       ...emptyContent.currently,
       ...(data?.currently || {}),
     },
-    media: Array.isArray(data?.media) ? data.media : [],
+
+    media: Array.isArray(data?.media)
+      ? data.media
+      : [],
   };
 }
 
@@ -73,14 +91,32 @@ function makeId(prefix) {
 }
 
 export default function StudioClient() {
-  const [content, setContent] = useState(emptyContent);
-  const [message, setMessage] = useState("");
-  const [tab, setTab] = useState("content");
-  const [status, setStatus] = useState("READY");
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [media, setMedia] = useState([]);
-  const [uploading, setUploading] = useState(false);
+  const [content, setContent] =
+    useState(emptyContent);
+
+  const [message, setMessage] =
+    useState("");
+
+  const [tab, setTab] =
+    useState("content");
+
+  const [status, setStatus] =
+    useState("READY");
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [media, setMedia] =
+    useState([]);
+
+  const [uploading, setUploading] =
+    useState(false);
+
+  const [thumbnailBusy, setThumbnailBusy] =
+    useState({});
 
   useEffect(() => {
     loadContent();
@@ -88,16 +124,22 @@ export default function StudioClient() {
 
   async function loadContent() {
     try {
-      const res = await fetch("/api/content", {
-        cache: "no-store",
-      });
+      const res = await fetch(
+        "/api/content",
+        {
+          cache: "no-store",
+        }
+      );
 
       if (!res.ok) {
-        throw new Error(`Load failed (${res.status})`);
+        throw new Error(
+          `Load failed (${res.status})`
+        );
       }
 
       const data = await res.json();
-      const normalized = normalizeContent(data);
+      const normalized =
+        normalizeContent(data);
 
       setContent(normalized);
       setMedia(normalized.media);
@@ -109,98 +151,140 @@ export default function StudioClient() {
 
   async function registerTouchID() {
     setError("");
-    setStatus("SETTING UP TOUCH ID…");
+    setStatus(
+      "SETTING UP TOUCH ID…"
+    );
 
     try {
-      const optionsRes = await fetch(
-        "/api/admin/passkey/register-options",
-        {
-          cache: "no-store",
-        }
-      );
+      const optionsRes =
+        await fetch(
+          "/api/admin/passkey/register-options",
+          {
+            cache: "no-store",
+          }
+        );
 
-      const options = await optionsRes.json();
+      const options =
+        await optionsRes.json();
 
       if (!optionsRes.ok) {
         throw new Error(
-          options.error || "Could not start Touch ID setup."
+          options.error ||
+            "Could not start Touch ID setup."
         );
       }
 
-      const credential = await startRegistration({
-        optionsJSON: options,
-      });
+      const credential =
+        await startRegistration({
+          optionsJSON: options,
+        });
 
-      const verifyRes = await fetch(
-        "/api/admin/passkey/register-verify",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(credential),
-        }
-      );
+      const verifyRes =
+        await fetch(
+          "/api/admin/passkey/register-verify",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify(
+              credential
+            ),
+          }
+        );
 
-      const data = await verifyRes.json().catch(() => ({}));
+      const data =
+        await verifyRes
+          .json()
+          .catch(() => ({}));
 
       if (!verifyRes.ok) {
         throw new Error(
-          data.error || "Touch ID setup failed."
+          data.error ||
+            "Touch ID setup failed."
         );
       }
 
-      setStatus("TOUCH ID READY ✓");
+      setStatus(
+        "TOUCH ID READY ✓"
+      );
     } catch (e) {
       setError(
-        e.message || "Touch ID setup was cancelled."
+        e.message ||
+          "Touch ID setup was cancelled."
       );
+
       setStatus("READY");
     }
   }
 
-  function updateArtist(field, value) {
+  function updateArtist(
+    field,
+    value
+  ) {
     setContent((prev) => ({
       ...prev,
+
       artist: {
         ...prev.artist,
         [field]: value,
       },
     }));
 
-    setStatus("READY TO PUBLISH");
+    setStatus(
+      "READY TO PUBLISH"
+    );
   }
 
-  function updateCurrently(field, value) {
+  function updateCurrently(
+    field,
+    value
+  ) {
     setContent((prev) => ({
       ...prev,
+
       currently: {
         ...prev.currently,
         [field]: value,
       },
     }));
 
-    setStatus("READY TO PUBLISH");
+    setStatus(
+      "READY TO PUBLISH"
+    );
   }
 
-  function updateList(key, id, field, value) {
+  function updateList(
+    key,
+    id,
+    field,
+    value
+  ) {
     setContent((prev) => ({
       ...prev,
-      [key]: prev[key].map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              [field]: value,
-            }
-          : item
+
+      [key]: prev[key].map(
+        (item) =>
+          item.id === id
+            ? {
+                ...item,
+                [field]: value,
+              }
+            : item
       ),
     }));
 
-    setStatus("READY TO PUBLISH");
+    setStatus(
+      "READY TO PUBLISH"
+    );
   }
 
-  function removeList(key, id) {
+  function removeList(
+    key,
+    id
+  ) {
     if (
       !window.confirm(
         "Remove this item? You can only restore it from your backup."
@@ -211,17 +295,22 @@ export default function StudioClient() {
 
     setContent((prev) => ({
       ...prev,
+
       [key]: prev[key].filter(
-        (item) => item.id !== id
+        (item) =>
+          item.id !== id
       ),
     }));
 
-    setStatus("READY TO PUBLISH");
+    setStatus(
+      "READY TO PUBLISH"
+    );
   }
 
   function addMusic() {
     setContent((prev) => ({
       ...prev,
+
       music: [
         {
           id: makeId("track"),
@@ -230,16 +319,20 @@ export default function StudioClient() {
           type: "ORIGINAL",
           audio: "",
         },
+
         ...prev.music,
       ],
     }));
 
-    setStatus("READY TO PUBLISH");
+    setStatus(
+      "READY TO PUBLISH"
+    );
   }
 
   function addGuitar() {
     setContent((prev) => ({
       ...prev,
+
       guitars: [
         {
           id: makeId("guitar"),
@@ -249,16 +342,20 @@ export default function StudioClient() {
           specs: "",
           image: "",
         },
+
         ...prev.guitars,
       ],
     }));
 
-    setStatus("READY TO PUBLISH");
+    setStatus(
+      "READY TO PUBLISH"
+    );
   }
 
   function addArchive() {
     setContent((prev) => ({
       ...prev,
+
       archive: [
         {
           id: makeId("archive"),
@@ -273,11 +370,14 @@ export default function StudioClient() {
             .toISOString()
             .slice(0, 10),
         },
+
         ...prev.archive,
       ],
     }));
 
-    setStatus("READY TO PUBLISH");
+    setStatus(
+      "READY TO PUBLISH"
+    );
   }
 
   async function save() {
@@ -285,29 +385,40 @@ export default function StudioClient() {
 
     setSaving(true);
     setError("");
-    setStatus("PUBLISHING…");
+    setStatus(
+      "PUBLISHING…"
+    );
 
     try {
-      const payload = normalizeContent(content);
+      const payload =
+        normalizeContent(
+          content
+        );
 
       const res = await fetch(
         "/api/admin/content",
         {
           method: "PUT",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
           },
           credentials: "include",
-          body: JSON.stringify(payload),
+          body: JSON.stringify(
+            payload
+          ),
         }
       );
 
-      const raw = await res.text();
+      const raw =
+        await res.text();
 
       let data = {};
 
       try {
-        data = raw ? JSON.parse(raw) : {};
+        data = raw
+          ? JSON.parse(raw)
+          : {};
       } catch {}
 
       if (!res.ok) {
@@ -317,156 +428,649 @@ export default function StudioClient() {
         );
       }
 
-      const saved = normalizeContent(
-        data.content || payload
-      );
+      const saved =
+        normalizeContent(
+          data.content ||
+            payload
+        );
 
       setContent(saved);
       setMedia(saved.media);
-      setStatus("PUBLISHED ✓");
+
+      setStatus(
+        "PUBLISHED ✓"
+      );
 
       setTimeout(() => {
         setStatus("READY");
       }, 2500);
     } catch (e) {
-      setStatus("PUBLISH FAILED");
+      setStatus(
+        "PUBLISH FAILED"
+      );
+
       setError(e.message);
     } finally {
       setSaving(false);
     }
   }
-  async function uploadFiles(fileList) {
-  const files = Array.from(fileList || []);
 
-  if (!files.length) return;
+  async function uploadFiles(
+    fileList
+  ) {
+    const files =
+      Array.from(
+        fileList || []
+      );
 
-  const supabase = getSupabaseBrowserClient();
+    if (!files.length) return;
 
-  setUploading(true);
-  setError("");
-  setStatus("PREPARING UPLOAD…");
+    const supabase =
+      getSupabaseBrowserClient();
 
-  try {
-    for (const file of files) {
-      setStatus(`PREPARING ${file.name}…`);
+    setUploading(true);
+    setError("");
+    setStatus(
+      "PREPARING UPLOAD…"
+    );
 
-      const prepareRes = await fetch("/api/admin/upload", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          name: file.name,
-          type: file.type,
-          size: file.size,
-        }),
-      });
+    try {
+      for (const file of files) {
+        setStatus(
+          `PREPARING ${file.name}…`
+        );
 
-      const prepared = await prepareRes.json().catch(() => ({}));
+        const prepareRes =
+          await fetch(
+            "/api/admin/upload",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+              credentials: "include",
+              body: JSON.stringify({
+                name: file.name,
+                type: file.type,
+                size: file.size,
+              }),
+            }
+          );
+
+        const prepared =
+          await prepareRes
+            .json()
+            .catch(
+              () => ({})
+            );
+
+        if (!prepareRes.ok) {
+          throw new Error(
+            prepared.error ||
+              `Upload preparation failed (${prepareRes.status})`
+          );
+        }
+
+        if (
+          !prepared.path ||
+          !prepared.token
+        ) {
+          throw new Error(
+            "Supabase did not return a valid upload token."
+          );
+        }
+
+        setStatus(
+          `UPLOADING ${file.name}…`
+        );
+
+        const {
+          data,
+          error,
+        } =
+          await supabase.storage
+            .from(
+              "anthh-media"
+            )
+            .uploadToSignedUrl(
+              prepared.path,
+              prepared.token,
+              file,
+              {
+                contentType:
+                  file.type,
+                cacheControl:
+                  "3600",
+              }
+            );
+
+        if (error) {
+          console.error(
+            "Supabase upload error:",
+            error
+          );
+
+          throw new Error(
+            error.message ||
+              "Supabase upload failed."
+          );
+        }
+
+        console.log(
+          "Upload successful:",
+          data
+        );
+
+        const mediaItem = {
+          ok: true,
+          url: prepared.url,
+          storagePath:
+            prepared.storagePath,
+          name: prepared.name,
+          type: prepared.type,
+          kind: prepared.kind,
+        };
+
+        setMedia((prev) => [
+          mediaItem,
+          ...prev,
+        ]);
+
+        setContent((prev) => ({
+          ...prev,
+
+          media: [
+            mediaItem,
+            ...(prev.media || []),
+          ],
+        }));
+
+        setStatus(
+          `${file.name} UPLOADED · READY TO PUBLISH`
+        );
+      }
+    } catch (e) {
+      console.error(
+        "UPLOAD FAILED:",
+        e
+      );
+
+      setError(
+        e?.message ||
+          "Upload failed."
+      );
+
+      setStatus(
+        "UPLOAD FAILED"
+      );
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function uploadThumbnail(
+    file,
+    item
+  ) {
+    if (!file || !item) return;
+
+    const id =
+      item.storagePath ||
+      item.url;
+
+    setThumbnailBusy(
+      (prev) => ({
+        ...prev,
+        [id]: true,
+      })
+    );
+
+    setError("");
+    setStatus(
+      "PREPARING THUMBNAIL…"
+    );
+
+    try {
+      const safeName =
+        `thumbnail-${Date.now()}-${file.name
+          .replace(
+            /[^a-zA-Z0-9._-]/g,
+            "-"
+          )}`;
+
+      const prepareRes =
+        await fetch(
+          "/api/admin/upload",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              name: safeName,
+              type:
+                file.type ||
+                "image/jpeg",
+              size: file.size,
+            }),
+          }
+        );
+
+      const prepared =
+        await prepareRes
+          .json()
+          .catch(
+            () => ({})
+          );
 
       if (!prepareRes.ok) {
         throw new Error(
           prepared.error ||
-          `Upload preparation failed (${prepareRes.status})`
+            `Thumbnail preparation failed (${prepareRes.status})`
         );
       }
 
-      if (!prepared.path || !prepared.token) {
+      if (
+        !prepared.path ||
+        !prepared.token
+      ) {
         throw new Error(
-          "Supabase did not return a valid upload token."
+          "Supabase did not return a thumbnail upload token."
         );
       }
 
-      setStatus(`UPLOADING ${file.name}…`);
+      setStatus(
+        "UPLOADING THUMBNAIL…"
+      );
 
-      const { data, error } = await supabase.storage
-        .from("anthh-media")
-        .uploadToSignedUrl(
-          prepared.path,
-          prepared.token,
-          file,
+      const supabase =
+        getSupabaseBrowserClient();
+
+      const {
+        error,
+      } =
+        await supabase.storage
+          .from(
+            "anthh-media"
+          )
+          .uploadToSignedUrl(
+            prepared.path,
+            prepared.token,
+            file,
+            {
+              contentType:
+                file.type ||
+                "image/jpeg",
+              cacheControl:
+                "3600",
+            }
+          );
+
+      if (error) {
+        throw new Error(
+          error.message ||
+            "Thumbnail upload failed."
+        );
+      }
+
+      const thumbnail = {
+        url: prepared.url,
+        storagePath:
+          prepared.storagePath,
+      };
+
+      updateMediaItem(
+        item,
+        {
+          thumbnail:
+            thumbnail.url,
+          thumbnailStoragePath:
+            thumbnail.storagePath,
+        }
+      );
+
+      setStatus(
+        "THUMBNAIL READY · PUBLISH CHANGES"
+      );
+    } catch (e) {
+      console.error(
+        "THUMBNAIL UPLOAD FAILED:",
+        e
+      );
+
+      setError(
+        e.message ||
+          "Thumbnail upload failed."
+      );
+
+      setStatus(
+        "THUMBNAIL FAILED"
+      );
+    } finally {
+      setThumbnailBusy(
+        (prev) => ({
+          ...prev,
+          [id]: false,
+        })
+      );
+    }
+  }
+
+  async function captureVideoFrame(
+    item
+  ) {
+    if (!item?.url) return;
+
+    const id =
+      item.storagePath ||
+      item.url;
+
+    setThumbnailBusy(
+      (prev) => ({
+        ...prev,
+        [id]: true,
+      })
+    );
+
+    setError("");
+    setStatus(
+      "CAPTURING VIDEO FRAME…"
+    );
+
+    try {
+      const video =
+        document.createElement(
+          "video"
+        );
+
+      video.src = item.url;
+      video.crossOrigin =
+        "anonymous";
+      video.muted = true;
+      video.playsInline = true;
+      video.preload =
+        "metadata";
+
+      await new Promise(
+        (resolve, reject) => {
+          video.onloadedmetadata =
+            resolve;
+
+          video.onerror = () =>
+            reject(
+              new Error(
+                "Could not load the video for thumbnail capture."
+              )
+            );
+        }
+      );
+
+      const duration =
+        Number.isFinite(
+          video.duration
+        )
+          ? video.duration
+          : 0;
+
+      video.currentTime =
+        duration > 0
+          ? Math.min(
+              1,
+              duration / 2
+            )
+          : 0;
+
+      await new Promise(
+        (resolve, reject) => {
+          video.onseeked =
+            resolve;
+
+          video.onerror = () =>
+            reject(
+              new Error(
+                "Could not seek to the selected video frame."
+              )
+            );
+        }
+      );
+
+      const canvas =
+        document.createElement(
+          "canvas"
+        );
+
+      canvas.width =
+        video.videoWidth ||
+        1280;
+
+      canvas.height =
+        video.videoHeight ||
+        720;
+
+      const context =
+        canvas.getContext(
+          "2d"
+        );
+
+      if (!context) {
+        throw new Error(
+          "Could not create the thumbnail canvas."
+        );
+      }
+
+      context.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      const blob =
+        await new Promise(
+          (resolve) =>
+            canvas.toBlob(
+              resolve,
+              "image/jpeg",
+              0.9
+            )
+        );
+
+      if (!blob) {
+        throw new Error(
+          "Could not create an image from the video frame."
+        );
+      }
+
+      const file =
+        new File(
+          [
+            blob,
+          ],
+          `thumbnail-${Date.now()}.jpg`,
           {
-            contentType: file.type,
-            cacheControl: "3600",
+            type:
+              "image/jpeg",
           }
         );
 
-      if (error) {
-        console.error("Supabase upload error:", error);
-        throw new Error(
-          error.message || "Supabase upload failed."
-        );
-      }
+      await uploadThumbnail(
+        file,
+        item
+      );
+    } catch (e) {
+      console.error(
+        "FRAME CAPTURE FAILED:",
+        e
+      );
 
-      console.log("Upload successful:", data);
-
-      const mediaItem = {
-        ok: true,
-        url: prepared.url,
-        storagePath: prepared.storagePath,
-        name: prepared.name,
-        type: prepared.type,
-        kind: prepared.kind,
-      };
-
-      setMedia((prev) => [
-        mediaItem,
-        ...prev,
-      ]);
-
-      setContent((prev) => ({
-        ...prev,
-        media: [
-          mediaItem,
-          ...(prev.media || []),
-        ],
-      }));
+      setError(
+        e.message ||
+          "Could not capture a video frame."
+      );
 
       setStatus(
-        `${file.name} UPLOADED · READY TO PUBLISH`
+        "FRAME CAPTURE FAILED"
+      );
+
+      setThumbnailBusy(
+        (prev) => ({
+          ...prev,
+          [id]: false,
+        })
       );
     }
-  } catch (e) {
-    console.error("UPLOAD FAILED:", e);
+  }
 
-    setError(
-      e?.message ||
-      "Upload failed."
+  function updateMediaItem(
+    item,
+    changes
+  ) {
+    const matches = (
+      mediaItem
+    ) =>
+      mediaItem.storagePath ===
+        item.storagePath ||
+      mediaItem.url === item.url;
+
+    setMedia((prev) =>
+      prev.map((mediaItem) =>
+        matches(mediaItem)
+          ? {
+              ...mediaItem,
+              ...changes,
+            }
+          : mediaItem
+      )
     );
 
-    setStatus("UPLOAD FAILED");
-  } finally {
-    setUploading(false);
+    setContent((prev) => ({
+      ...prev,
+
+      media: (
+        prev.media || []
+      ).map((mediaItem) =>
+        matches(mediaItem)
+          ? {
+              ...mediaItem,
+              ...changes,
+            }
+          : mediaItem
+      ),
+    }));
   }
-}
-  async function deleteMedia(item) {
+
+  async function removeThumbnail(
+    item
+  ) {
+    if (!item?.thumbnail) {
+      return;
+    }
+
+    const confirmed =
+      window.confirm(
+        "Remove this video thumbnail?"
+      );
+
+    if (!confirmed) return;
+
     try {
-      if (!item?.storagePath) {
+      if (
+        item.thumbnailStoragePath
+      ) {
+        const res =
+          await fetch(
+            "/api/admin/upload/delete",
+            {
+              method: "DELETE",
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+              credentials:
+                "include",
+              body: JSON.stringify({
+                storagePath:
+                  item.thumbnailStoragePath,
+              }),
+            }
+          );
+
+        const data =
+          await res
+            .json()
+            .catch(
+              () => ({})
+            );
+
+        if (!res.ok) {
+          throw new Error(
+            data.error ||
+              "Could not delete thumbnail."
+          );
+        }
+      }
+
+      updateMediaItem(
+        item,
+        {
+          thumbnail:
+            undefined,
+          thumbnailStoragePath:
+            undefined,
+        }
+      );
+
+      setStatus(
+        "THUMBNAIL REMOVED · PUBLISH CHANGES"
+      );
+    } catch (e) {
+      setError(
+        e.message ||
+          "Could not remove thumbnail."
+      );
+    }
+  }
+
+  async function deleteMedia(
+    item
+  ) {
+    try {
+      if (
+        !item?.storagePath
+      ) {
         throw new Error(
           "This media item has no Supabase storage path. Re-upload it before deleting."
         );
       }
 
-      const res = await fetch(
-        "/api/admin/upload/delete",
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            storagePath:
-              item.storagePath,
-          }),
-        }
-      );
+      const res =
+        await fetch(
+          "/api/admin/upload/delete",
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            credentials:
+              "include",
+            body: JSON.stringify({
+              storagePath:
+                item.storagePath,
+            }),
+          }
+        );
 
       const data =
-        await res.json().catch(
-          () => ({})
-        );
+        await res
+          .json()
+          .catch(
+            () => ({})
+          );
 
       if (!res.ok) {
         throw new Error(
@@ -475,36 +1079,65 @@ export default function StudioClient() {
         );
       }
 
-      const url = item.url;
+      if (
+        item.thumbnailStoragePath
+      ) {
+        await fetch(
+          "/api/admin/upload/delete",
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            credentials:
+              "include",
+            body: JSON.stringify({
+              storagePath:
+                item.thumbnailStoragePath,
+            }),
+          }
+        );
+      }
+
+      const url =
+        item.url;
 
       setMedia((prev) =>
         prev.filter(
           (mediaItem) =>
-            mediaItem.url !== url
+            mediaItem.url !==
+            url
         )
       );
 
       setContent((prev) => ({
         ...prev,
 
-        media: (prev.media || []).filter(
+        media: (
+          prev.media || []
+        ).filter(
           (mediaItem) =>
-            mediaItem.url !== url
+            mediaItem.url !==
+            url
         ),
 
         archive: (
           prev.archive || []
         ).filter(
           (archiveItem) =>
-            archiveItem.url !== url &&
-            archiveItem.image !== url
+            archiveItem.url !==
+              url &&
+            archiveItem.image !==
+              url
         ),
 
         music: (
           prev.music || []
         ).filter(
           (musicItem) =>
-            musicItem.audio !== url
+            musicItem.audio !==
+            url
         ),
       }));
 
@@ -513,41 +1146,65 @@ export default function StudioClient() {
       );
     } catch (e) {
       setError(
-        e.message || "Delete failed."
+        e.message ||
+          "Delete failed."
       );
     }
   }
 
-  function addMediaToArchive(item) {
-    const title = window.prompt(
-      "Archive title",
-      item.name || "Untitled"
-    );
+  function addMediaToArchive(
+    item
+  ) {
+    const title =
+      window.prompt(
+        "Archive title",
+        item.name ||
+          "Untitled"
+      );
 
-    if (title === null) return;
+    if (title === null)
+      return;
 
-    const description = window.prompt(
-      "Archive description",
-      ""
-    );
+    const description =
+      window.prompt(
+        "Archive description",
+        ""
+      );
 
-    if (description === null) return;
+    if (
+      description === null
+    )
+      return;
 
     const entry = {
-      id: makeId("archive"),
+      id: makeId(
+        "archive"
+      ),
+
       title:
-        title.trim() || "Untitled",
+        title.trim() ||
+        "Untitled",
+
       type:
-        item.kind || "RECENT",
+        item.kind ||
+        "RECENT",
+
       description:
         description.trim(),
+
       url: item.url,
+
       image:
-        item.kind === "IMAGE"
+        item.kind ===
+        "IMAGE"
           ? item.url
           : undefined,
-      mediaType: item.kind,
+
+      mediaType:
+        item.kind,
+
       featured: true,
+
       date: new Date()
         .toISOString()
         .slice(0, 10),
@@ -555,49 +1212,73 @@ export default function StudioClient() {
 
     setContent((prev) => ({
       ...prev,
+
       archive: [
         entry,
-        ...(prev.archive || []),
+        ...(prev.archive ||
+          []),
       ],
     }));
 
-    setStatus("READY TO PUBLISH");
+    setStatus(
+      "READY TO PUBLISH"
+    );
   }
 
-  function addMediaToMusic(item) {
-    const title = window.prompt(
-      "Track title",
-      item.name || "Untitled"
-    );
+  function addMediaToMusic(
+    item
+  ) {
+    const title =
+      window.prompt(
+        "Track title",
+        item.name ||
+          "Untitled"
+      );
 
-    if (title === null) return;
+    if (title === null)
+      return;
 
-    const description = window.prompt(
-      "Track description",
-      ""
-    );
+    const description =
+      window.prompt(
+        "Track description",
+        ""
+      );
 
-    if (description === null) return;
+    if (
+      description === null
+    )
+      return;
 
     const entry = {
-      id: makeId("track"),
+      id: makeId(
+        "track"
+      ),
+
       title:
-        title.trim() || "Untitled",
+        title.trim() ||
+        "Untitled",
+
       description:
         description.trim(),
+
       audio: item.url,
+
       type: "TRACK",
     };
 
     setContent((prev) => ({
       ...prev,
+
       music: [
         entry,
-        ...(prev.music || []),
+        ...(prev.music ||
+          []),
       ],
     }));
 
-    setStatus("READY TO PUBLISH");
+    setStatus(
+      "READY TO PUBLISH"
+    );
   }
 
   async function logout() {
@@ -605,11 +1286,13 @@ export default function StudioClient() {
       "/api/admin/logout",
       {
         method: "POST",
-        credentials: "include",
+        credentials:
+          "include",
       }
     );
 
-    window.location.href = "/admin";
+    window.location.href =
+      "/admin";
   }
 
   const tabs = [
@@ -623,18 +1306,28 @@ export default function StudioClient() {
 
   return (
     <main style={styles.page}>
-      <header style={styles.header}>
+      <header
+        style={styles.header}
+      >
         <div>
-          <div style={styles.kicker}>
+          <div
+            style={styles.kicker}
+          >
             ANTHH / STUDIO
           </div>
 
-          <h1 style={styles.title}>
+          <h1
+            style={styles.title}
+          >
             Studio
           </h1>
         </div>
 
-        <div style={styles.headerActions}>
+        <div
+          style={
+            styles.headerActions
+          }
+        >
           <a
             href="/"
             style={styles.secondary}
@@ -645,7 +1338,9 @@ export default function StudioClient() {
           <button
             type="button"
             onClick={logout}
-            style={styles.secondaryButton}
+            style={
+              styles.secondaryButton
+            }
           >
             LOG OUT
           </button>
@@ -656,7 +1351,9 @@ export default function StudioClient() {
             disabled={saving}
             style={{
               ...styles.publish,
-              opacity: saving ? 0.6 : 1,
+              opacity: saving
+                ? 0.6
+                : 1,
               cursor: saving
                 ? "wait"
                 : "pointer",
@@ -670,19 +1367,26 @@ export default function StudioClient() {
       </header>
 
       {error && (
-        <div style={styles.error}>
+        <div
+          style={styles.error}
+        >
           {error}
         </div>
       )}
 
-      <nav style={styles.tabs}>
+      <nav
+        style={styles.tabs}
+      >
         {tabs.map((name) => (
           <button
             type="button"
             key={name}
-            onClick={() => setTab(name)}
+            onClick={() =>
+              setTab(name)
+            }
             style={{
               ...styles.tab,
+
               ...(tab === name
                 ? styles.activeTab
                 : {}),
@@ -696,7 +1400,9 @@ export default function StudioClient() {
       {tab === "content" && (
         <ContentEditor
           content={content}
-          updateArtist={updateArtist}
+          updateArtist={
+            updateArtist
+          }
           updateCurrently={
             updateCurrently
           }
@@ -734,57 +1440,101 @@ export default function StudioClient() {
         <MediaEditor
           media={media}
           uploading={uploading}
-          uploadFiles={uploadFiles}
-          addArchive={addMediaToArchive}
-          addMusic={addMediaToMusic}
-          deleteMedia={deleteMedia}
+          uploadFiles={
+            uploadFiles
+          }
+          addArchive={
+            addMediaToArchive
+          }
+          addMusic={
+            addMediaToMusic
+          }
+          deleteMedia={
+            deleteMedia
+          }
+          uploadThumbnail={
+            uploadThumbnail
+          }
+          captureVideoFrame={
+            captureVideoFrame
+          }
+          removeThumbnail={
+            removeThumbnail
+          }
+          thumbnailBusy={
+            thumbnailBusy
+          }
         />
       )}
 
       {tab === "settings" && (
-        <section style={styles.panel}>
-          <div style={styles.kicker}>
+        <section
+          style={styles.panel}
+        >
+          <div
+            style={styles.kicker}
+          >
             SECURITY
           </div>
 
-          <h2 style={styles.h2}>
+          <h2
+            style={styles.h2}
+          >
             Studio access
           </h2>
 
-          <p style={styles.muted}>
-            Your admin session stays signed
-            in for up to 30 days. You can
-            enroll this Mac's Touch ID as a
-            passkey so future logins can use
-            biometric authentication instead
-            of typing the password.
+          <p
+            style={styles.muted}
+          >
+            Your admin session stays
+            signed in for up to 30
+            days. You can enroll this
+            Mac's Touch ID as a
+            passkey so future logins
+            can use biometric
+            authentication instead of
+            typing the password.
           </p>
 
           <button
             type="button"
-            onClick={registerTouchID}
-            style={styles.bigPublish}
+            onClick={
+              registerTouchID
+            }
+            style={
+              styles.bigPublish
+            }
           >
-            ENABLE TOUCH ID / PASSKEY
+            ENABLE TOUCH ID /
+            PASSKEY
           </button>
 
-          <div style={styles.note}>
-            Use Safari on macOS with Touch ID
-            enabled. Password login remains
-            available as a fallback.
+          <div
+            style={styles.note}
+          >
+            Use Safari on macOS with
+            Touch ID enabled. Password
+            login remains available as
+            a fallback.
           </div>
         </section>
       )}
 
       {tab !== "settings" && (
-        <div style={styles.bottomBar}>
+        <div
+          style={
+            styles.bottomBar
+          }
+        >
           <span>{status}</span>
 
           <button
             type="button"
             onClick={save}
             disabled={saving}
-            style={styles.bigPublish}
+            style={
+              styles.bigPublish
+            }
           >
             {saving
               ? "PUBLISHING…"
@@ -801,22 +1551,33 @@ function ContentEditor({
   updateArtist,
   updateCurrently,
 }) {
-  const artist = content.artist;
+  const artist =
+    content.artist;
 
   return (
-    <section style={styles.panel}>
-      <div style={styles.sectionHead}>
+    <section
+      style={styles.panel}
+    >
+      <div
+        style={styles.sectionHead}
+      >
         <div>
-          <div style={styles.kicker}>
+          <div
+            style={styles.kicker}
+          >
             PUBLIC PROFILE
           </div>
 
-          <h2 style={styles.h2}>
+          <h2
+            style={styles.h2}
+          >
             Artist identity
           </h2>
         </div>
 
-        <span style={styles.status}>
+        <span
+          style={styles.status}
+        >
           EDIT ALL PROFILE COPY
         </span>
       </div>
@@ -824,7 +1585,9 @@ function ContentEditor({
       <Field label="Artist / pen name">
         <input
           style={styles.input}
-          value={artist.name || ""}
+          value={
+            artist.name || ""
+          }
           onChange={(e) =>
             updateArtist(
               "name",
@@ -837,7 +1600,9 @@ function ContentEditor({
       <Field label="Roles">
         <input
           style={styles.input}
-          value={artist.roles || ""}
+          value={
+            artist.roles || ""
+          }
           onChange={(e) =>
             updateArtist(
               "roles",
@@ -850,7 +1615,9 @@ function ContentEditor({
       <Field label="Hero / tagline">
         <input
           style={styles.input}
-          value={artist.tagline || ""}
+          value={
+            artist.tagline || ""
+          }
           onChange={(e) =>
             updateArtist(
               "tagline",
@@ -864,7 +1631,9 @@ function ContentEditor({
         <textarea
           style={styles.textarea}
           rows={6}
-          value={artist.bio || ""}
+          value={
+            artist.bio || ""
+          }
           onChange={(e) =>
             updateArtist(
               "bio",
@@ -878,7 +1647,9 @@ function ContentEditor({
         <textarea
           style={styles.textarea}
           rows={6}
-          value={artist.about || ""}
+          value={
+            artist.about || ""
+          }
           onChange={(e) =>
             updateArtist(
               "about",
@@ -892,7 +1663,10 @@ function ContentEditor({
         <textarea
           style={styles.textarea}
           rows={3}
-          value={artist.musicIntro || ""}
+          value={
+            artist.musicIntro ||
+            ""
+          }
           onChange={(e) =>
             updateArtist(
               "musicIntro",
@@ -906,7 +1680,10 @@ function ContentEditor({
         <textarea
           style={styles.textarea}
           rows={3}
-          value={artist.guitarsIntro || ""}
+          value={
+            artist.guitarsIntro ||
+            ""
+          }
           onChange={(e) =>
             updateArtist(
               "guitarsIntro",
@@ -916,11 +1693,16 @@ function ContentEditor({
         />
       </Field>
 
-      <div style={styles.twoCol}>
+      <div
+        style={styles.twoCol}
+      >
         <Field label="Hero image URL">
           <input
             style={styles.input}
-            value={artist.heroImage || ""}
+            value={
+              artist.heroImage ||
+              ""
+            }
             onChange={(e) =>
               updateArtist(
                 "heroImage",
@@ -933,7 +1715,10 @@ function ContentEditor({
         <Field label="Story image URL">
           <input
             style={styles.input}
-            value={artist.storyImage || ""}
+            value={
+              artist.storyImage ||
+              ""
+            }
             onChange={(e) =>
               updateArtist(
                 "storyImage",
@@ -944,11 +1729,16 @@ function ContentEditor({
         </Field>
       </div>
 
-      <div style={styles.twoCol}>
+      <div
+        style={styles.twoCol}
+      >
         <Field label="Instagram URL">
           <input
             style={styles.input}
-            value={artist.instagram || ""}
+            value={
+              artist.instagram ||
+              ""
+            }
             onChange={(e) =>
               updateArtist(
                 "instagram",
@@ -961,7 +1751,10 @@ function ContentEditor({
         <Field label="YouTube URL">
           <input
             style={styles.input}
-            value={artist.youtube || ""}
+            value={
+              artist.youtube ||
+              ""
+            }
             onChange={(e) =>
               updateArtist(
                 "youtube",
@@ -975,7 +1768,9 @@ function ContentEditor({
       <Field label="Spotify URL">
         <input
           style={styles.input}
-          value={artist.spotify || ""}
+          value={
+            artist.spotify || ""
+          }
           onChange={(e) =>
             updateArtist(
               "spotify",
@@ -985,29 +1780,43 @@ function ContentEditor({
         />
       </Field>
 
-      <div style={styles.subHead}>
-        <div className="kicker">
-          ABOUT / PROFESSIONAL PROFILE
+      <div
+        style={styles.subHead}
+      >
+        <div
+          className="kicker"
+        >
+          ABOUT / PROFESSIONAL
+          PROFILE
         </div>
 
-        <h3 style={styles.h3}>
+        <h3
+          style={styles.h3}
+        >
           Help people understand the
           artist behind the work
         </h3>
 
-        <p style={styles.muted}>
-          This powers the public About page
-          and is written for new listeners,
-          collaborators, producers and
-          studios.
+        <p
+          style={styles.muted}
+        >
+          This powers the public About
+          page and is written for new
+          listeners, collaborators,
+          producers and studios.
         </p>
       </div>
 
-      <div style={styles.twoCol}>
+      <div
+        style={styles.twoCol}
+      >
         <Field label="Hometown">
           <input
             style={styles.input}
-            value={artist.hometown || ""}
+            value={
+              artist.hometown ||
+              ""
+            }
             placeholder="Your hometown"
             onChange={(e) =>
               updateArtist(
@@ -1021,7 +1830,9 @@ function ContentEditor({
         <Field label="Based in">
           <input
             style={styles.input}
-            value={artist.basedIn || ""}
+            value={
+              artist.basedIn || ""
+            }
             onChange={(e) =>
               updateArtist(
                 "basedIn",
@@ -1032,11 +1843,16 @@ function ContentEditor({
         </Field>
       </div>
 
-      <div style={styles.twoCol}>
+      <div
+        style={styles.twoCol}
+      >
         <Field label="What I'm studying">
           <input
             style={styles.input}
-            value={artist.education || ""}
+            value={
+              artist.education ||
+              ""
+            }
             onChange={(e) =>
               updateArtist(
                 "education",
@@ -1050,7 +1866,8 @@ function ContentEditor({
           <input
             style={styles.input}
             value={
-              artist.educationDetail || ""
+              artist.educationDetail ||
+              ""
             }
             onChange={(e) =>
               updateArtist(
@@ -1066,7 +1883,9 @@ function ContentEditor({
         <textarea
           style={styles.textarea}
           rows={6}
-          value={artist.journey || ""}
+          value={
+            artist.journey || ""
+          }
           onChange={(e) =>
             updateArtist(
               "journey",
@@ -1080,7 +1899,9 @@ function ContentEditor({
         <textarea
           style={styles.textarea}
           rows={6}
-          value={artist.future || ""}
+          value={
+            artist.future || ""
+          }
           onChange={(e) =>
             updateArtist(
               "future",
@@ -1094,7 +1915,10 @@ function ContentEditor({
         <textarea
           style={styles.textarea}
           rows={6}
-          value={artist.producerPitch || ""}
+          value={
+            artist.producerPitch ||
+            ""
+          }
           onChange={(e) =>
             updateArtist(
               "producerPitch",
@@ -1107,7 +1931,9 @@ function ContentEditor({
       <Field label="Skills (separate with ·)">
         <input
           style={styles.input}
-          value={artist.skills || ""}
+          value={
+            artist.skills || ""
+          }
           onChange={(e) =>
             updateArtist(
               "skills",
@@ -1121,7 +1947,10 @@ function ContentEditor({
         <input
           type="email"
           style={styles.input}
-          value={artist.contactEmail || ""}
+          value={
+            artist.contactEmail ||
+            ""
+          }
           placeholder="you@example.com"
           onChange={(e) =>
             updateArtist(
@@ -1132,17 +1961,25 @@ function ContentEditor({
         />
       </Field>
 
-      <div style={styles.subHead}>
-        <div className="kicker">
+      <div
+        style={styles.subHead}
+      >
+        <div
+          className="kicker"
+        >
           CURRENTLY / JOURNAL
         </div>
 
-        <h3 style={styles.h3}>
+        <h3
+          style={styles.h3}
+        >
           What you're doing now
         </h3>
       </div>
 
-      <div style={styles.twoCol}>
+      <div
+        style={styles.twoCol}
+      >
         {[
           "playing",
           "listeningTo",
@@ -1152,7 +1989,8 @@ function ContentEditor({
           <Field
             key={field}
             label={
-              field === "listeningTo"
+              field ===
+              "listeningTo"
                 ? "Listening to"
                 : field[0].toUpperCase() +
                   field.slice(1)
@@ -1186,7 +2024,9 @@ function MusicEditor({
   remove,
 }) {
   return (
-    <section style={styles.panel}>
+    <section
+      style={styles.panel}
+    >
       <EditorHeader
         kicker="MUSIC / RELEASES"
         title="Music"
@@ -1200,117 +2040,172 @@ function MusicEditor({
         />
       )}
 
-      <div style={styles.editorList}>
-        {items.map((item, i) => (
-          <article
-            key={item.id || i}
-            style={styles.editorCard}
-          >
-            <div style={styles.cardTop}>
-              <span style={styles.number}>
-                {String(i + 1).padStart(
-                  2,
-                  "0"
-                )}
-              </span>
-
-              <strong>
-                {item.title ||
-                  "UNTITLED"}
-              </strong>
-
-              <button
-                type="button"
-                onClick={() =>
-                  remove(
-                    "music",
-                    item.id
-                  )
-                }
+      <div
+        style={styles.editorList}
+      >
+        {items.map(
+          (item, i) => (
+            <article
+              key={
+                item.id || i
+              }
+              style={
+                styles.editorCard
+              }
+            >
+              <div
                 style={
-                  styles.deleteButton
+                  styles.cardTop
                 }
               >
-                REMOVE
-              </button>
-            </div>
+                <span
+                  style={
+                    styles.number
+                  }
+                >
+                  {String(
+                    i + 1
+                  ).padStart(
+                    2,
+                    "0"
+                  )}
+                </span>
 
-            <div style={styles.twoCol}>
-              <Field label="Title">
+                <strong>
+                  {item.title ||
+                    "UNTITLED"}
+                </strong>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    remove(
+                      "music",
+                      item.id
+                    )
+                  }
+                  style={
+                    styles.deleteButton
+                  }
+                >
+                  REMOVE
+                </button>
+              </div>
+
+              <div
+                style={
+                  styles.twoCol
+                }
+              >
+                <Field label="Title">
+                  <input
+                    style={
+                      styles.input
+                    }
+                    value={
+                      item.title ||
+                      ""
+                    }
+                    onChange={(
+                      e
+                    ) =>
+                      update(
+                        "music",
+                        item.id,
+                        "title",
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </Field>
+
+                <Field label="Type">
+                  <input
+                    style={
+                      styles.input
+                    }
+                    value={
+                      item.type ||
+                      ""
+                    }
+                    onChange={(
+                      e
+                    ) =>
+                      update(
+                        "music",
+                        item.id,
+                        "type",
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </Field>
+              </div>
+
+              <Field label="Description">
                 <input
-                  style={styles.input}
-                  value={item.title || ""}
-                  onChange={(e) =>
+                  style={
+                    styles.input
+                  }
+                  value={
+                    item.description ||
+                    ""
+                  }
+                  onChange={(
+                    e
+                  ) =>
                     update(
                       "music",
                       item.id,
-                      "title",
-                      e.target.value
+                      "description",
+                      e.target
+                        .value
                     )
                   }
                 />
               </Field>
 
-              <Field label="Type">
+              <Field label="Audio URL">
                 <input
-                  style={styles.input}
-                  value={item.type || ""}
-                  onChange={(e) =>
+                  style={
+                    styles.input
+                  }
+                  placeholder="/uploads/track.mp3"
+                  value={
+                    item.audio ||
+                    ""
+                  }
+                  onChange={(
+                    e
+                  ) =>
                     update(
                       "music",
                       item.id,
-                      "type",
-                      e.target.value
+                      "audio",
+                      e.target
+                        .value
                     )
                   }
                 />
               </Field>
-            </div>
 
-            <Field label="Description">
-              <input
-                style={styles.input}
-                value={
-                  item.description || ""
-                }
-                onChange={(e) =>
-                  update(
-                    "music",
-                    item.id,
-                    "description",
-                    e.target.value
-                  )
-                }
-              />
-            </Field>
-
-            <Field label="Audio URL">
-              <input
-                style={styles.input}
-                placeholder="/uploads/track.mp3"
-                value={item.audio || ""}
-                onChange={(e) =>
-                  update(
-                    "music",
-                    item.id,
-                    "audio",
-                    e.target.value
-                  )
-                }
-              />
-            </Field>
-
-            {item.audio && (
-              <audio
-                controls
-                src={item.audio}
-                style={{
-                  width: "100%",
-                }}
-              />
-            )}
-          </article>
-        ))}
+              {item.audio && (
+                <audio
+                  controls
+                  src={
+                    item.audio
+                  }
+                  style={{
+                    width:
+                      "100%",
+                  }}
+                />
+              )}
+            </article>
+          )
+        )}
       </div>
     </section>
   );
@@ -1323,7 +2218,9 @@ function GuitarEditor({
   remove,
 }) {
   return (
-    <section style={styles.panel}>
+    <section
+      style={styles.panel}
+    >
       <EditorHeader
         kicker="GUITARS / GEAR"
         title="Guitars"
@@ -1337,137 +2234,203 @@ function GuitarEditor({
         />
       )}
 
-      <div style={styles.editorList}>
-        {items.map((item, i) => (
-          <article
-            key={item.id || i}
-            style={styles.editorCard}
-          >
-            <div style={styles.cardTop}>
-              <span style={styles.number}>
-                {String(i + 1).padStart(
-                  2,
-                  "0"
-                )}
-              </span>
-
-              <strong>
-                {item.name ||
-                  "NEW GUITAR"}
-              </strong>
-
-              <button
-                type="button"
-                onClick={() =>
-                  remove(
-                    "guitars",
-                    item.id
-                  )
-                }
+      <div
+        style={styles.editorList}
+      >
+        {items.map(
+          (item, i) => (
+            <article
+              key={
+                item.id || i
+              }
+              style={
+                styles.editorCard
+              }
+            >
+              <div
                 style={
-                  styles.deleteButton
+                  styles.cardTop
                 }
               >
-                REMOVE
-              </button>
-            </div>
+                <span
+                  style={
+                    styles.number
+                  }
+                >
+                  {String(
+                    i + 1
+                  ).padStart(
+                    2,
+                    "0"
+                  )}
+                </span>
 
-            <div style={styles.twoCol}>
-              <Field label="Name">
-                <input
-                  style={styles.input}
-                  value={item.name || ""}
-                  onChange={(e) =>
-                    update(
+                <strong>
+                  {item.name ||
+                    "NEW GUITAR"}
+                </strong>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    remove(
                       "guitars",
-                      item.id,
-                      "name",
-                      e.target.value
+                      item.id
                     )
                   }
-                />
-              </Field>
-
-              <Field label="Type">
-                <input
-                  style={styles.input}
-                  value={item.type || ""}
-                  onChange={(e) =>
-                    update(
-                      "guitars",
-                      item.id,
-                      "type",
-                      e.target.value
-                    )
+                  style={
+                    styles.deleteButton
                   }
-                />
-              </Field>
-            </div>
+                >
+                  REMOVE
+                </button>
+              </div>
 
-            <Field label="Description">
-              <textarea
-                style={styles.textarea}
-                rows={3}
-                value={
-                  item.description || ""
-                }
-                onChange={(e) =>
-                  update(
-                    "guitars",
-                    item.id,
-                    "description",
-                    e.target.value
-                  )
-                }
-              />
-            </Field>
-
-            <div style={styles.twoCol}>
-              <Field label="Specs">
-                <input
-                  style={styles.input}
-                  value={item.specs || ""}
-                  onChange={(e) =>
-                    update(
-                      "guitars",
-                      item.id,
-                      "specs",
-                      e.target.value
-                    )
-                  }
-                />
-              </Field>
-
-              <Field label="Image URL">
-                <input
-                  style={styles.input}
-                  value={item.image || ""}
-                  onChange={(e) =>
-                    update(
-                      "guitars",
-                      item.id,
-                      "image",
-                      e.target.value
-                    )
-                  }
-                />
-              </Field>
-            </div>
-
-            {item.image && (
-              <img
-                src={item.image}
-                alt={
-                  item.name ||
-                  "Guitar"
-                }
+              <div
                 style={
-                  styles.inlineImage
+                  styles.twoCol
                 }
-              />
-            )}
-          </article>
-        ))}
+              >
+                <Field label="Name">
+                  <input
+                    style={
+                      styles.input
+                    }
+                    value={
+                      item.name ||
+                      ""
+                    }
+                    onChange={(
+                      e
+                    ) =>
+                      update(
+                        "guitars",
+                        item.id,
+                        "name",
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </Field>
+
+                <Field label="Type">
+                  <input
+                    style={
+                      styles.input
+                    }
+                    value={
+                      item.type ||
+                      ""
+                    }
+                    onChange={(
+                      e
+                    ) =>
+                      update(
+                        "guitars",
+                        item.id,
+                        "type",
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </Field>
+              </div>
+
+              <Field label="Description">
+                <textarea
+                  style={
+                    styles.textarea
+                  }
+                  rows={3}
+                  value={
+                    item.description ||
+                    ""
+                  }
+                  onChange={(
+                    e
+                  ) =>
+                    update(
+                      "guitars",
+                      item.id,
+                      "description",
+                      e.target
+                        .value
+                    )
+                  }
+                />
+              </Field>
+
+              <div
+                style={
+                  styles.twoCol
+                }
+              >
+                <Field label="Specs">
+                  <input
+                    style={
+                      styles.input
+                    }
+                    value={
+                      item.specs ||
+                      ""
+                    }
+                    onChange={(
+                      e
+                    ) =>
+                      update(
+                        "guitars",
+                        item.id,
+                        "specs",
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </Field>
+
+                <Field label="Image URL">
+                  <input
+                    style={
+                      styles.input
+                    }
+                    value={
+                      item.image ||
+                      ""
+                    }
+                    onChange={(
+                      e
+                    ) =>
+                      update(
+                        "guitars",
+                        item.id,
+                        "image",
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </Field>
+              </div>
+
+              {item.image && (
+                <img
+                  src={
+                    item.image
+                  }
+                  alt={
+                    item.name ||
+                    "Guitar"
+                  }
+                  style={
+                    styles.inlineImage
+                  }
+                />
+              )}
+            </article>
+          )
+        )}
       </div>
     </section>
   );
@@ -1480,7 +2443,9 @@ function ArchiveEditor({
   remove,
 }) {
   return (
-    <section style={styles.panel}>
+    <section
+      style={styles.panel}
+    >
       <EditorHeader
         kicker="ARCHIVE / MOMENTS"
         title="Archive"
@@ -1494,194 +2459,269 @@ function ArchiveEditor({
         />
       )}
 
-      <div style={styles.editorList}>
-        {items.map((item, i) => (
-          <article
-            key={item.id || i}
-            style={styles.editorCard}
-          >
-            <div style={styles.cardTop}>
-              <span style={styles.number}>
-                {String(i + 1).padStart(
-                  2,
-                  "0"
-                )}
-              </span>
-
-              <strong>
-                {item.title ||
-                  "UNTITLED"}
-              </strong>
-
-              <button
-                type="button"
-                onClick={() =>
-                  remove(
-                    "archive",
-                    item.id
-                  )
-                }
+      <div
+        style={styles.editorList}
+      >
+        {items.map(
+          (item, i) => (
+            <article
+              key={
+                item.id || i
+              }
+              style={
+                styles.editorCard
+              }
+            >
+              <div
                 style={
-                  styles.deleteButton
+                  styles.cardTop
                 }
               >
-                REMOVE
-              </button>
-            </div>
-
-            <div style={styles.twoCol}>
-              <Field label="Title">
-                <input
-                  style={styles.input}
-                  value={item.title || ""}
-                  onChange={(e) =>
-                    update(
-                      "archive",
-                      item.id,
-                      "title",
-                      e.target.value
-                    )
-                  }
-                />
-              </Field>
-
-              <Field label="Type">
-                <input
-                  style={styles.input}
-                  value={item.type || ""}
-                  onChange={(e) =>
-                    update(
-                      "archive",
-                      item.id,
-                      "type",
-                      e.target.value
-                    )
-                  }
-                />
-              </Field>
-            </div>
-
-            <Field label="Description">
-              <textarea
-                style={styles.textarea}
-                rows={3}
-                value={
-                  item.description || ""
-                }
-                onChange={(e) =>
-                  update(
-                    "archive",
-                    item.id,
-                    "description",
-                    e.target.value
-                  )
-                }
-              />
-            </Field>
-
-            <div style={styles.twoCol}>
-              <Field label="Image / media URL">
-                <input
-                  style={styles.input}
-                  value={
-                    item.image ||
-                    item.url ||
-                    ""
-                  }
-                  onChange={(e) =>
-                    update(
-                      "archive",
-                      item.id,
-                      "image",
-                      e.target.value
-                    )
-                  }
-                />
-              </Field>
-
-              <Field label="Date">
-                <input
-                  type="date"
-                  style={styles.input}
-                  value={item.date || ""}
-                  onChange={(e) =>
-                    update(
-                      "archive",
-                      item.id,
-                      "date",
-                      e.target.value
-                    )
-                  }
-                />
-              </Field>
-            </div>
-
-            <div style={styles.twoCol}>
-              <Field label="Media type">
-                <input
-                  style={styles.input}
-                  value={
-                    item.mediaType ||
-                    "IMAGE"
-                  }
-                  onChange={(e) =>
-                    update(
-                      "archive",
-                      item.id,
-                      "mediaType",
-                      e.target.value
-                    )
-                  }
-                />
-              </Field>
-
-              <Field label="Featured">
-                <select
-                  style={styles.input}
-                  value={
-                    item.featured === false
-                      ? "false"
-                      : "true"
-                  }
-                  onChange={(e) =>
-                    update(
-                      "archive",
-                      item.id,
-                      "featured",
-                      e.target.value ===
-                        "true"
-                    )
+                <span
+                  style={
+                    styles.number
                   }
                 >
-                  <option value="true">
-                    YES — SHOW PUBLICLY
-                  </option>
+                  {String(
+                    i + 1
+                  ).padStart(
+                    2,
+                    "0"
+                  )}
+                </span>
 
-                  <option value="false">
-                    NO — HIDE
-                  </option>
-                </select>
-              </Field>
-            </div>
+                <strong>
+                  {item.title ||
+                    "UNTITLED"}
+                </strong>
 
-            {(item.image ||
-              item.url) && (
-              <img
-                src={
-                  item.image ||
-                  item.url
-                }
-                alt={
-                  item.title ||
-                  "Archive"
-                }
+                <button
+                  type="button"
+                  onClick={() =>
+                    remove(
+                      "archive",
+                      item.id
+                    )
+                  }
+                  style={
+                    styles.deleteButton
+                  }
+                >
+                  REMOVE
+                </button>
+              </div>
+
+              <div
                 style={
-                  styles.inlineImage
+                  styles.twoCol
                 }
-              />
-            )}
-          </article>
-        ))}
+              >
+                <Field label="Title">
+                  <input
+                    style={
+                      styles.input
+                    }
+                    value={
+                      item.title ||
+                      ""
+                    }
+                    onChange={(
+                      e
+                    ) =>
+                      update(
+                        "archive",
+                        item.id,
+                        "title",
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </Field>
+
+                <Field label="Type">
+                  <input
+                    style={
+                      styles.input
+                    }
+                    value={
+                      item.type ||
+                      ""
+                    }
+                    onChange={(
+                      e
+                    ) =>
+                      update(
+                        "archive",
+                        item.id,
+                        "type",
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </Field>
+              </div>
+
+              <Field label="Description">
+                <textarea
+                  style={
+                    styles.textarea
+                  }
+                  rows={3}
+                  value={
+                    item.description ||
+                    ""
+                  }
+                  onChange={(
+                    e
+                  ) =>
+                    update(
+                      "archive",
+                      item.id,
+                      "description",
+                      e.target
+                        .value
+                    )
+                  }
+                />
+              </Field>
+
+              <div
+                style={
+                  styles.twoCol
+                }
+              >
+                <Field label="Image / media URL">
+                  <input
+                    style={
+                      styles.input
+                    }
+                    value={
+                      item.image ||
+                      item.url ||
+                      ""
+                    }
+                    onChange={(
+                      e
+                    ) =>
+                      update(
+                        "archive",
+                        item.id,
+                        "image",
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </Field>
+
+                <Field label="Date">
+                  <input
+                    type="date"
+                    style={
+                      styles.input
+                    }
+                    value={
+                      item.date ||
+                      ""
+                    }
+                    onChange={(
+                      e
+                    ) =>
+                      update(
+                        "archive",
+                        item.id,
+                        "date",
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </Field>
+              </div>
+
+              <div
+                style={
+                  styles.twoCol
+                }
+              >
+                <Field label="Media type">
+                  <input
+                    style={
+                      styles.input
+                    }
+                    value={
+                      item.mediaType ||
+                      "IMAGE"
+                    }
+                    onChange={(
+                      e
+                    ) =>
+                      update(
+                        "archive",
+                        item.id,
+                        "mediaType",
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </Field>
+
+                <Field label="Featured">
+                  <select
+                    style={
+                      styles.input
+                    }
+                    value={
+                      item.featured ===
+                      false
+                        ? "false"
+                        : "true"
+                    }
+                    onChange={(
+                      e
+                    ) =>
+                      update(
+                        "archive",
+                        item.id,
+                        "featured",
+                        e.target
+                          .value ===
+                          "true"
+                    )}
+                  >
+                    <option value="true">
+                      YES — SHOW PUBLICLY
+                    </option>
+
+                    <option value="false">
+                      NO — HIDE
+                    </option>
+                  </select>
+                </Field>
+              </div>
+
+              {(item.image ||
+                item.url) && (
+                <img
+                  src={
+                    item.image ||
+                    item.url
+                  }
+                  alt={
+                    item.title ||
+                    "Archive"
+                  }
+                  style={
+                    styles.inlineImage
+                  }
+                />
+              )}
+            </article>
+          )
+        )}
       </div>
     </section>
   );
@@ -1694,26 +2734,42 @@ function MediaEditor({
   addArchive,
   addMusic,
   deleteMedia,
+  uploadThumbnail,
+  captureVideoFrame,
+  removeThumbnail,
+  thumbnailBusy,
 }) {
   return (
-    <section style={styles.panel}>
-      <div style={styles.sectionHead}>
+    <section
+      style={styles.panel}
+    >
+      <div
+        style={styles.sectionHead}
+      >
         <div>
-          <div style={styles.kicker}>
+          <div
+            style={styles.kicker}
+          >
             MEDIA LIBRARY
           </div>
 
-          <h2 style={styles.h2}>
+          <h2
+            style={styles.h2}
+          >
             Upload your work
           </h2>
         </div>
 
-        <span style={styles.status}>
+        <span
+          style={styles.status}
+        >
           IMAGES · VIDEO · AUDIO
         </span>
       </div>
 
-      <label style={styles.uploadBox}>
+      <label
+        style={styles.uploadBox}
+      >
         <input
           type="file"
           multiple
@@ -1722,9 +2778,13 @@ function MediaEditor({
             uploadFiles(
               e.target.files
             );
-            e.target.value = "";
+
+            e.target.value =
+              "";
           }}
-          style={styles.fileInput}
+          style={
+            styles.fileInput
+          }
         />
 
         <strong>
@@ -1745,108 +2805,306 @@ function MediaEditor({
         />
       )}
 
-      <div style={styles.mediaGrid}>
-        {media.map((item) => (
-          <article
-            key={item.url}
-            style={styles.mediaCard}
-          >
-            {item.kind === "IMAGE" ? (
-              <img
-                src={item.url}
-                alt={item.name}
+      <div
+        style={styles.mediaGrid}
+      >
+        {media.map(
+          (item) => {
+            const itemKey =
+              item.storagePath ||
+              item.url;
+
+            const isBusy =
+              thumbnailBusy[
+                itemKey
+              ];
+
+            return (
+              <article
+                key={item.url}
                 style={
-                  styles.mediaPreview
-                }
-              />
-            ) : item.kind === "VIDEO" ? (
-              <video
-                src={item.url}
-                controls
-                style={
-                  styles.mediaPreview
-                }
-              />
-            ) : (
-              <div
-                style={
-                  styles.audioPreview
+                  styles.mediaCard
                 }
               >
-                <span>AUDIO</span>
-
-                <audio
-                  src={item.url}
-                  controls
-                />
-              </div>
-            )}
-
-            <div style={styles.mediaMeta}>
-              <strong>
-                {item.name}
-              </strong>
-
-              <span>
-                {item.kind}
-              </span>
-
-              <div
-                style={
-                  styles.mediaActions
-                }
-              >
-                {(item.kind === "IMAGE" ||
-                  item.kind === "VIDEO") && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      addArchive(item)
-                    }
-                    style={
-                      styles.actionButton
-                    }
-                  >
-                    ADD TO ARCHIVE
-                  </button>
-                )}
-
                 {item.kind ===
-                  "AUDIO" && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      addMusic(item)
+                "IMAGE" ? (
+                  <img
+                    src={item.url}
+                    alt={
+                      item.name
                     }
                     style={
-                      styles.actionButton
+                      styles.mediaPreview
+                    }
+                  />
+                ) : item.kind ===
+                  "VIDEO" ? (
+                  <div
+                    style={
+                      styles.videoStudioPreview
                     }
                   >
-                    ADD TO MUSIC
-                  </button>
+                    <video
+                      src={item.url}
+                      poster={
+                        item.thumbnail ||
+                        undefined
+                      }
+                      controls
+                      style={
+                        styles.mediaPreview
+                      }
+                    />
+
+                    {item.thumbnail && (
+                      <div
+                        style={
+                          styles.thumbnailBadge
+                        }
+                      >
+                        CUSTOM THUMBNAIL
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div
+                    style={
+                      styles.audioPreview
+                    }
+                  >
+                    <span>
+                      AUDIO
+                    </span>
+
+                    <audio
+                      src={
+                        item.url
+                      }
+                      controls
+                    />
+                  </div>
                 )}
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    deleteMedia(item)
-                  }
+                <div
                   style={
-                    styles.deleteButton
+                    styles.mediaMeta
                   }
                 >
-                  DELETE
-                </button>
-              </div>
-            </div>
-          </article>
-        ))}
+                  <strong>
+                    {item.name}
+                  </strong>
+
+                  <span>
+                    {item.kind}
+                  </span>
+
+                  {item.kind ===
+                    "VIDEO" && (
+                    <div
+                      style={
+                        styles.thumbnailPanel
+                      }
+                    >
+                      <div
+                        style={
+                          styles.thumbnailHeading
+                        }
+                      >
+                        VIDEO PREVIEW
+                      </div>
+
+                      {item.thumbnail ? (
+                        <div
+                          style={
+                            styles.thumbnailPreviewWrap
+                          }
+                        >
+                          <img
+                            src={
+                              item.thumbnail
+                            }
+                            alt="Video thumbnail"
+                            style={
+                              styles.thumbnailPreview
+                            }
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              removeThumbnail(
+                                item
+                              )
+                            }
+                            style={
+                              styles.smallDelete
+                            }
+                          >
+                            REMOVE THUMBNAIL
+                          </button>
+                        </div>
+                      ) : (
+                        <div
+                          style={
+                            styles.noThumbnail
+                          }
+                        >
+                          No custom thumbnail
+                          selected.
+                        </div>
+                      )}
+
+                      <div
+                        style={
+                          styles.thumbnailButtons
+                        }
+                      >
+                        <label
+                          style={
+                            styles.thumbnailButton
+                          }
+                        >
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            style={
+                              styles.hiddenFileInput
+                            }
+                            disabled={
+                              isBusy
+                            }
+                            onChange={(
+                              e
+                            ) => {
+                              const file =
+                                e.target
+                                  .files?.[0];
+
+                              if (
+                                file
+                              ) {
+                                uploadThumbnail(
+                                  file,
+                                  item
+                                );
+                              }
+
+                              e.target.value =
+                                "";
+                            }}
+                          />
+
+                          {isBusy
+                            ? "UPLOADING…"
+                            : "CHOOSE THUMBNAIL"}
+                        </label>
+
+                        <button
+                          type="button"
+                          disabled={
+                            isBusy
+                          }
+                          onClick={() =>
+                            captureVideoFrame(
+                              item
+                            )
+                          }
+                          style={{
+                            ...styles.thumbnailButton,
+                            opacity:
+                              isBusy
+                                ? 0.5
+                                : 1,
+                          }}
+                        >
+                          {isBusy
+                            ? "WORKING…"
+                            : "USE VIDEO FRAME"}
+                        </button>
+                      </div>
+
+                      <span
+                        style={
+                          styles.thumbnailHint
+                        }
+                      >
+                        Upload an image or
+                        automatically capture
+                        a frame from this video.
+                      </span>
+                    </div>
+                  )}
+
+                  <div
+                    style={
+                      styles.mediaActions
+                    }
+                  >
+                    {(item.kind ===
+                      "IMAGE" ||
+                      item.kind ===
+                        "VIDEO") && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          addArchive(
+                            item
+                          )
+                        }
+                        style={
+                          styles.actionButton
+                        }
+                      >
+                        ADD TO ARCHIVE
+                      </button>
+                    )}
+
+                    {item.kind ===
+                      "AUDIO" && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          addMusic(
+                            item
+                          )
+                        }
+                        style={
+                          styles.actionButton
+                        }
+                      >
+                        ADD TO MUSIC
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        deleteMedia(
+                          item
+                        )
+                      }
+                      style={
+                        styles.deleteButton
+                      }
+                    >
+                      DELETE
+                    </button>
+                  </div>
+                </div>
+              </article>
+            );
+          }
+        )}
       </div>
 
-      <p style={styles.muted}>
-        Uploading stores the file. Adding
-        it to Music or Archive connects it
-        to the public site. Press{" "}
+      <p
+        style={styles.muted}
+      >
+        Uploading stores the file.
+        Thumbnails are stored alongside
+        videos. Adding media to Music or
+        Archive connects it to the public
+        site. Press{" "}
         <b>PUBLISH CHANGES</b> after editing.
       </p>
     </section>
@@ -1860,27 +3118,38 @@ function EditorHeader({
   onAdd,
 }) {
   return (
-    <div style={styles.sectionHead}>
+    <div
+      style={styles.sectionHead}
+    >
       <div>
-        <div style={styles.kicker}>
+        <div
+          style={styles.kicker}
+        >
           {kicker}
         </div>
 
-        <h2 style={styles.h2}>
+        <h2
+          style={styles.h2}
+        >
           {title}
         </h2>
 
-        <p style={styles.muted}>
-          Create, edit, remove and publish
-          entries. Every saved change is
-          used by the public site.
+        <p
+          style={styles.muted}
+        >
+          Create, edit, remove and
+          publish entries. Every saved
+          change is used by the public
+          site.
         </p>
       </div>
 
       <button
         type="button"
         onClick={onAdd}
-        style={styles.actionButton}
+        style={
+          styles.actionButton
+        }
       >
         {button}
       </button>
@@ -1890,15 +3159,22 @@ function EditorHeader({
 
 function Empty({ text }) {
   return (
-    <div style={styles.empty}>
+    <div
+      style={styles.empty}
+    >
       {text}
     </div>
   );
 }
 
-function Field({ label, children }) {
+function Field({
+  label,
+  children,
+}) {
   return (
-    <label style={styles.field}>
+    <label
+      style={styles.field}
+    >
       <span>{label}</span>
       {children}
     </label>
@@ -1918,10 +3194,12 @@ const styles = {
 
   header: {
     display: "flex",
-    justifyContent: "space-between",
+    justifyContent:
+      "space-between",
     alignItems: "flex-end",
     gap: 24,
-    borderBottom: "1px solid #333",
+    borderBottom:
+      "1px solid #333",
     paddingBottom: 28,
   },
 
@@ -1932,7 +3210,8 @@ const styles = {
   },
 
   title: {
-    fontSize: "clamp(42px, 7vw, 88px)",
+    fontSize:
+      "clamp(42px, 7vw, 88px)",
     lineHeight: 0.9,
     margin: "12px 0 0",
     fontWeight: 500,
@@ -1947,37 +3226,50 @@ const styles = {
 
   secondary: {
     color: "#f3f0e8",
-    textDecoration: "none",
-    border: "1px solid #444",
-    padding: "13px 16px",
+    textDecoration:
+      "none",
+    border:
+      "1px solid #444",
+    padding:
+      "13px 16px",
     fontSize: 11,
-    letterSpacing: ".12em",
+    letterSpacing:
+      ".12em",
   },
 
   secondaryButton: {
-    background: "transparent",
+    background:
+      "transparent",
     color: "#f3f0e8",
-    border: "1px solid #444",
-    padding: "13px 16px",
+    border:
+      "1px solid #444",
+    padding:
+      "13px 16px",
     fontSize: 11,
-    letterSpacing: ".12em",
+    letterSpacing:
+      ".12em",
     cursor: "pointer",
   },
 
   publish: {
     border: 0,
-    background: "#f3f0e8",
+    background:
+      "#f3f0e8",
     color: "#0d0d0d",
-    padding: "14px 18px",
+    padding:
+      "14px 18px",
     fontSize: 11,
     fontWeight: 700,
-    letterSpacing: ".12em",
+    letterSpacing:
+      ".12em",
   },
 
   error: {
     marginTop: 20,
-    border: "1px solid #8b3d3d",
-    background: "#2a1515",
+    border:
+      "1px solid #8b3d3d",
+    background:
+      "#2a1515",
     padding: 16,
     color: "#ffb5b5",
     fontSize: 13,
@@ -1991,84 +3283,106 @@ const styles = {
   },
 
   tab: {
-    background: "transparent",
+    background:
+      "transparent",
     color: "#999",
-    border: "1px solid #292929",
-    padding: "12px 16px",
+    border:
+      "1px solid #292929",
+    padding:
+      "12px 16px",
     cursor: "pointer",
     fontSize: 11,
-    letterSpacing: ".1em",
+    letterSpacing:
+      ".1em",
   },
 
   activeTab: {
     color: "#f3f0e8",
-    border: "1px solid #777",
+    border:
+      "1px solid #777",
   },
 
   panel: {
     maxWidth: 1050,
-    border: "1px solid #292929",
+    border:
+      "1px solid #292929",
     padding:
       "clamp(20px, 4vw, 42px)",
   },
 
   sectionHead: {
     display: "flex",
-    justifyContent: "space-between",
+    justifyContent:
+      "space-between",
     gap: 24,
-    alignItems: "flex-end",
+    alignItems:
+      "flex-end",
     marginBottom: 30,
   },
 
   h2: {
     fontSize: 32,
     fontWeight: 400,
-    margin: "8px 0 0",
+    margin:
+      "8px 0 0",
   },
 
   h3: {
     fontSize: 20,
     fontWeight: 400,
-    margin: "8px 0 18px",
+    margin:
+      "8px 0 18px",
   },
 
   status: {
     fontSize: 10,
-    letterSpacing: ".14em",
+    letterSpacing:
+      ".14em",
     opacity: 0.7,
-    whiteSpace: "nowrap",
+    whiteSpace:
+      "nowrap",
   },
 
   field: {
     display: "block",
-    margin: "0 0 22px",
+    margin:
+      "0 0 22px",
     minWidth: 0,
   },
 
   input: {
     width: "100%",
-    boxSizing: "border-box",
+    boxSizing:
+      "border-box",
     marginTop: 8,
-    background: "#151515",
-    color: "#f3f0e8",
-    border: "1px solid #444",
-    padding: "14px",
+    background:
+      "#151515",
+    color:
+      "#f3f0e8",
+    border:
+      "1px solid #444",
+    padding: 14,
     outline: "none",
     fontSize: 15,
   },
 
   textarea: {
     width: "100%",
-    boxSizing: "border-box",
+    boxSizing:
+      "border-box",
     marginTop: 8,
-    background: "#151515",
-    color: "#f3f0e8",
-    border: "1px solid #444",
-    padding: "14px",
+    background:
+      "#151515",
+    color:
+      "#f3f0e8",
+    border:
+      "1px solid #444",
+    padding: 14,
     outline: "none",
     fontSize: 15,
     resize: "vertical",
-    fontFamily: "inherit",
+    fontFamily:
+      "inherit",
   },
 
   twoCol: {
@@ -2079,7 +3393,8 @@ const styles = {
   },
 
   subHead: {
-    borderTop: "1px solid #292929",
+    borderTop:
+      "1px solid #292929",
     paddingTop: 28,
     marginTop: 18,
   },
@@ -2092,13 +3407,16 @@ const styles = {
 
   bigPublish: {
     width: "100%",
-    background: "#f3f0e8",
-    color: "#0d0d0d",
+    background:
+      "#f3f0e8",
+    color:
+      "#0d0d0d",
     border: 0,
-    padding: "17px",
+    padding: 17,
     fontSize: 12,
     fontWeight: 700,
-    letterSpacing: ".15em",
+    letterSpacing:
+      ".15em",
     cursor: "pointer",
   },
 
@@ -2107,7 +3425,8 @@ const styles = {
     display: "grid",
     gridTemplateColumns:
       "1fr auto",
-    alignItems: "center",
+    alignItems:
+      "center",
     gap: 20,
     marginTop: 20,
     position: "sticky",
@@ -2115,8 +3434,10 @@ const styles = {
     background:
       "rgba(13,13,13,.96)",
     padding: 12,
-    border: "1px solid #292929",
-    backdropFilter: "blur(10px)",
+    border:
+      "1px solid #292929",
+    backdropFilter:
+      "blur(10px)",
   },
 
   editorList: {
@@ -2125,9 +3446,11 @@ const styles = {
   },
 
   editorCard: {
-    border: "1px solid #292929",
+    border:
+      "1px solid #292929",
     padding: 20,
-    background: "#111",
+    background:
+      "#111",
   },
 
   cardTop: {
@@ -2135,40 +3458,55 @@ const styles = {
     gridTemplateColumns:
       "40px 1fr auto",
     gap: 12,
-    alignItems: "center",
+    alignItems:
+      "center",
     marginBottom: 20,
   },
 
   number: {
     fontSize: 11,
-    letterSpacing: ".1em",
+    letterSpacing:
+      ".1em",
     opacity: 0.5,
   },
 
   deleteButton: {
-    justifySelf: "start",
-    background: "transparent",
-    color: "#f3f0e8",
-    border: "1px solid #555",
-    padding: "7px 10px",
-    cursor: "pointer",
+    justifySelf:
+      "start",
+    background:
+      "transparent",
+    color:
+      "#f3f0e8",
+    border:
+      "1px solid #555",
+    padding:
+      "7px 10px",
+    cursor:
+      "pointer",
     fontSize: 10,
-    letterSpacing: ".1em",
+    letterSpacing:
+      ".1em",
   },
 
   actionButton: {
-    background: "#f3f0e8",
-    color: "#0d0d0d",
+    background:
+      "#f3f0e8",
+    color:
+      "#0d0d0d",
     border: 0,
-    padding: "9px 11px",
-    cursor: "pointer",
+    padding:
+      "9px 11px",
+    cursor:
+      "pointer",
     fontSize: 10,
     fontWeight: 700,
-    letterSpacing: ".08em",
+    letterSpacing:
+      ".08em",
   },
 
   empty: {
-    border: "1px dashed #444",
+    border:
+      "1px dashed #444",
     padding: 28,
     color: "#888",
     marginBottom: 18,
@@ -2177,23 +3515,31 @@ const styles = {
 
   uploadBox: {
     display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection:
+      "column",
+    alignItems:
+      "center",
+    justifyContent:
+      "center",
     gap: 10,
     minHeight: 180,
-    border: "1px dashed #666",
-    background: "#111",
+    border:
+      "1px dashed #666",
+    background:
+      "#111",
     marginBottom: 28,
-    textAlign: "center",
-    cursor: "pointer",
+    textAlign:
+      "center",
+    cursor:
+      "pointer",
   },
 
   fileInput: {
     width: "100%",
     padding: 40,
     color: "#aaa",
-    cursor: "pointer",
+    cursor:
+      "pointer",
   },
 
   mediaGrid: {
@@ -2205,27 +3551,60 @@ const styles = {
   },
 
   mediaCard: {
-    border: "1px solid #292929",
-    background: "#111",
-    overflow: "hidden",
+    border:
+      "1px solid #292929",
+    background:
+      "#111",
+    overflow:
+      "hidden",
   },
 
   mediaPreview: {
     width: "100%",
-    aspectRatio: "16/10",
-    objectFit: "cover",
-    display: "block",
-    background: "#000",
+    aspectRatio:
+      "16/10",
+    objectFit:
+      "cover",
+    display:
+      "block",
+    background:
+      "#000",
+  },
+
+  videoStudioPreview: {
+    position:
+      "relative",
+    background:
+      "#000",
+  },
+
+  thumbnailBadge: {
+    position:
+      "absolute",
+    top: 10,
+    left: 10,
+    background:
+      "rgba(0,0,0,.75)",
+    color:
+      "#fff",
+    padding:
+      "6px 8px",
+    fontSize: 8,
+    letterSpacing:
+      ".12em",
   },
 
   audioPreview: {
     minHeight: 130,
     display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
+    flexDirection:
+      "column",
+    justifyContent:
+      "center",
     gap: 16,
     padding: 18,
-    background: "#151515",
+    background:
+      "#151515",
   },
 
   mediaMeta: {
@@ -2238,14 +3617,120 @@ const styles = {
   mediaActions: {
     display: "flex",
     gap: 8,
-    flexWrap: "wrap",
+    flexWrap:
+      "wrap",
+  },
+
+  thumbnailPanel: {
+    borderTop:
+      "1px solid #292929",
+    marginTop: 12,
+    paddingTop: 14,
+  },
+
+  thumbnailHeading: {
+    fontSize: 9,
+    letterSpacing:
+      ".15em",
+    opacity: 0.55,
+    marginBottom: 10,
+  },
+
+  thumbnailPreviewWrap: {
+    display: "grid",
+    gap: 8,
+    marginBottom: 12,
+  },
+
+  thumbnailPreview: {
+    display:
+      "block",
+    width: "100%",
+    aspectRatio:
+      "16/9",
+    objectFit:
+      "cover",
+    background:
+      "#000",
+  },
+
+  noThumbnail: {
+    border:
+      "1px dashed #444",
+    padding: 14,
+    color: "#777",
+    fontSize: 11,
+    marginBottom: 12,
+  },
+
+  thumbnailButtons: {
+    display: "flex",
+    gap: 8,
+    flexWrap:
+      "wrap",
+  },
+
+  thumbnailButton: {
+    display:
+      "inline-flex",
+    alignItems:
+      "center",
+    justifyContent:
+      "center",
+    background:
+      "#f3f0e8",
+    color:
+      "#0d0d0d",
+    border: 0,
+    padding:
+      "9px 11px",
+    cursor:
+      "pointer",
+    fontSize: 9,
+    fontWeight: 700,
+    letterSpacing:
+      ".08em",
+  },
+
+  hiddenFileInput: {
+    display: "none",
+  },
+
+  smallDelete: {
+    justifySelf:
+      "start",
+    background:
+      "transparent",
+    color:
+      "#aaa",
+    border:
+      "1px solid #444",
+    padding:
+      "7px 10px",
+    cursor:
+      "pointer",
+    fontSize: 9,
+    letterSpacing:
+      ".08em",
+  },
+
+  thumbnailHint: {
+    display:
+      "block",
+    color:
+      "#666",
+    fontSize: 9,
+    lineHeight: 1.5,
+    marginTop: 10,
   },
 
   inlineImage: {
-    display: "block",
+    display:
+      "block",
     width: "100%",
     maxHeight: 300,
-    objectFit: "cover",
+    objectFit:
+      "cover",
     marginTop: 6,
   },
 
