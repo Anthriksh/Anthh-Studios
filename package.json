@@ -7,10 +7,11 @@
     "start": "next start"
   },
   "dependencies": {
+    "@simplewebauthn/browser": "^14.0.0",
+    "@simplewebauthn/server": "^14.0.0",
+    "@supabase/supabase-js": "^2.117.2",
     "next": "16.3.8",
     "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "@simplewebauthn/browser": "^14.0.0",
-    "@simplewebauthn/server": "^14.0.0"
+    "react-dom": "19.2.0"
   }
 }
