@@ -7,6 +7,7 @@
     "about": "I play guitar, sing, write songs and keep collecting the little moments that turn into music.",
     "heroImage": "/images/hero.png",
     "storyImage": "/images/acoustic.png",
+    "aboutImage": "/images/about.png",
     "musicIntro": "Originals, covers, demos and late-night ideas.",
     "guitarsIntro": "Every instrument leaves a little of itself in the music.",
     "instagram": "",
@@ -16,11 +17,11 @@
     "basedIn": "Hyderabad, India",
     "education": "B.Tech — CSE (AI & ML)",
     "educationDetail": "Student, building a creative life alongside technology.",
-    "journey": "I started with the guitar, then found my way into singing, songwriting and recording. I am interested in the space where technology and music meet — making things, learning constantly and turning ideas into work people can feel.",
-    "future": "My goal is to grow into a professional recording artist and songwriter, work with serious musicians and producers, release original music, and build a body of work that feels unmistakably mine.",
+    "journey": "I started singing before I ever imagined where music would take me. Later, I picked up a guitar and slowly discovered another way to express the things I couldn’t always put into words. For a long time, though, I wasn’t completely serious about music. I was afraid that it might not work out, and that fear made me hold myself back. Eventually, I realized that I didn’t want to spend my life wondering what could have happened. I decided that I would simply do what makes me happy, whether it works out exactly the way I hope or not. So I keep singing, playing guitar, writing songs, recording, and learning along the way. I’m interested in the space where technology and music meet, and I want to keep turning the ideas in my head into something people can actually feel. I don’t know exactly where this path will take me, and maybe everything won’t work out the way I imagine — but I’ve stopped letting that be the reason I don’t try. For now, I just want to keep creating, keep getting better, and see how far I can take it.",
+    "future": "My goal is to grow into a professional recording artist and songwriter, work with serious musicians and producers I respect, release original music, and build a body of work that feels genuinely mine.",
     "producerPitch": "If you are a producer, artist, composer, studio or creative team looking for a guitarist, vocalist, songwriter or a hungry collaborator, I am open to conversations, sessions and collaborations.",
     "skills": "Guitar · Vocals · Songwriting · Recording · Creative Direction",
-    "contactEmail": ""
+    "contactEmail": "your@email.com"
   },
   "music": [],
   "guitars": [
@@ -75,5 +76,6 @@
       "type": "video/mp4",
       "kind": "VIDEO"
     }
-  ]
+  ],
+  "posts": []
 }
