@@ -34,6 +34,7 @@ const emptyContent = {
   music: [],
   guitars: [],
   archive: [],
+  posts: [],
 
   currently: {
     playing: "",
@@ -71,6 +72,10 @@ function normalizeContent(data) {
 
     archive: Array.isArray(data?.archive)
       ? data.archive
+      : [],
+
+    posts: Array.isArray(data?.posts)
+      ? data.posts
       : [],
 
     currently: {
@@ -138,6 +143,7 @@ export default function StudioClient() {
       }
 
       const data = await res.json();
+
       const normalized =
         normalizeContent(data);
 
@@ -372,6 +378,32 @@ export default function StudioClient() {
         },
 
         ...prev.archive,
+      ],
+    }));
+
+    setStatus(
+      "READY TO PUBLISH"
+    );
+  }
+
+  function addPost() {
+    setContent((prev) => ({
+      ...prev,
+
+      posts: [
+        {
+          id: makeId("post"),
+          title: "NEW ANNOUNCEMENT",
+          message: "",
+          type: "ANNOUNCEMENT",
+          date: new Date()
+            .toISOString()
+            .slice(0, 10),
+          published: true,
+          showInTicker: true,
+        },
+
+        ...(prev.posts || []),
       ],
     }));
 
@@ -1298,6 +1330,7 @@ export default function StudioClient() {
   const tabs = [
     "content",
     "music",
+    "posts",
     "guitars",
     "archive",
     "media",
@@ -1413,6 +1446,15 @@ export default function StudioClient() {
         <MusicEditor
           items={content.music}
           add={addMusic}
+          update={updateList}
+          remove={removeList}
+        />
+      )}
+
+      {tab === "posts" && (
+        <PostsEditor
+          items={content.posts}
+          add={addPost}
           update={updateList}
           remove={removeList}
         />
@@ -2202,6 +2244,303 @@ function MusicEditor({
                       "100%",
                   }}
                 />
+              )}
+            </article>
+          )
+        )}
+      </div>
+    </section>
+  );
+}
+
+function PostsEditor({
+  items,
+  add,
+  update,
+  remove,
+}) {
+  return (
+    <section
+      style={styles.panel}
+    >
+      <EditorHeader
+        kicker="POSTS / ANNOUNCEMENTS"
+        title="What's happening"
+        button="NEW POST"
+        onAdd={add}
+      />
+
+      <p
+        style={styles.muted}
+      >
+        Use posts for release announcements,
+        upcoming plans, important updates,
+        events, new songs, videos and anything
+        you want visitors to notice. Posts marked
+        for the ticker appear directly below the
+        public site's header.
+      </p>
+
+      {!items.length && (
+        <Empty
+          text="No posts yet. Create your first announcement."
+        />
+      )}
+
+      <div
+        style={styles.editorList}
+      >
+        {items.map(
+          (item, i) => (
+            <article
+              key={
+                item.id || i
+              }
+              style={
+                styles.editorCard
+              }
+            >
+              <div
+                style={
+                  styles.cardTop
+                }
+              >
+                <span
+                  style={
+                    styles.number
+                  }
+                >
+                  {String(
+                    i + 1
+                  ).padStart(
+                    2,
+                    "0"
+                  )}
+                </span>
+
+                <strong>
+                  {item.title ||
+                    "UNTITLED POST"}
+                </strong>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    remove(
+                      "posts",
+                      item.id
+                    )
+                  }
+                  style={
+                    styles.deleteButton
+                  }
+                >
+                  REMOVE
+                </button>
+              </div>
+
+              <div
+                style={
+                  styles.twoCol
+                }
+              >
+                <Field label="Post title">
+                  <input
+                    style={
+                      styles.input
+                    }
+                    value={
+                      item.title ||
+                      ""
+                    }
+                    placeholder="My new single is coming..."
+                    onChange={(e) =>
+                      update(
+                        "posts",
+                        item.id,
+                        "title",
+                        e.target.value
+                      )
+                    }
+                  />
+                </Field>
+
+                <Field label="Category">
+                  <input
+                    style={
+                      styles.input
+                    }
+                    value={
+                      item.type ||
+                      ""
+                    }
+                    placeholder="RELEASE / ANNOUNCEMENT / EVENT"
+                    onChange={(e) =>
+                      update(
+                        "posts",
+                        item.id,
+                        "type",
+                        e.target.value
+                      )
+                    }
+                  />
+                </Field>
+              </div>
+
+              <Field label="Announcement / message">
+                <textarea
+                  style={
+                    styles.textarea
+                  }
+                  rows={4}
+                  value={
+                    item.message ||
+                    ""
+                  }
+                  placeholder="My new song releases tomorrow..."
+                  onChange={(e) =>
+                    update(
+                      "posts",
+                      item.id,
+                      "message",
+                      e.target.value
+                    )
+                  }
+                />
+              </Field>
+
+              <div
+                style={
+                  styles.twoCol
+                }
+              >
+                <Field label="Date">
+                  <input
+                    type="date"
+                    style={
+                      styles.input
+                    }
+                    value={
+                      item.date ||
+                      ""
+                    }
+                    onChange={(e) =>
+                      update(
+                        "posts",
+                        item.id,
+                        "date",
+                        e.target.value
+                      )
+                    }
+                  />
+                </Field>
+
+                <Field label="Published">
+                  <select
+                    style={
+                      styles.input
+                    }
+                    value={
+                      item.published ===
+                      false
+                        ? "false"
+                        : "true"
+                    }
+                    onChange={(e) =>
+                      update(
+                        "posts",
+                        item.id,
+                        "published",
+                        e.target.value ===
+                          "true"
+                      )
+                    }
+                  >
+                    <option value="true">
+                      YES — PUBLISHED
+                    </option>
+
+                    <option value="false">
+                      NO — DRAFT
+                    </option>
+                  </select>
+                </Field>
+              </div>
+
+              <div
+                style={
+                  styles.postOptions
+                }
+              >
+                <label
+                  style={
+                    styles.checkboxRow
+                  }
+                >
+                  <input
+                    type="checkbox"
+                    checked={
+                      item.showInTicker !==
+                      false
+                    }
+                    onChange={(e) =>
+                      update(
+                        "posts",
+                        item.id,
+                        "showInTicker",
+                        e.target.checked
+                      )
+                    }
+                  />
+
+                  <span>
+                    SHOW THIS POST IN THE
+                    HEADER TICKER
+                  </span>
+                </label>
+              </div>
+
+              {item.message && (
+                <div
+                  style={
+                    styles.tickerPreview
+                  }
+                >
+                  <div
+                    style={
+                      styles.tickerPreviewLabel
+                    }
+                  >
+                    LIVE TICKER PREVIEW
+                  </div>
+
+                  <div
+                    style={
+                      styles.tickerPreviewText
+                    }
+                  >
+                    <strong>
+                      {item.type ||
+                        "ANNOUNCEMENT"}
+                    </strong>
+
+                    <span>·</span>
+
+                    <span>
+                      {item.message}
+                    </span>
+
+                    {item.date && (
+                      <>
+                        <span>·</span>
+
+                        <span>
+                          {item.date}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
               )}
             </article>
           )
@@ -3511,6 +3850,57 @@ const styles = {
     color: "#888",
     marginBottom: 18,
     lineHeight: 1.6,
+  },
+
+  postOptions: {
+    borderTop:
+      "1px solid #292929",
+    borderBottom:
+      "1px solid #292929",
+    padding: "16px 0",
+    margin: "4px 0 18px",
+  },
+
+  checkboxRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    cursor: "pointer",
+    fontSize: 10,
+    letterSpacing: ".12em",
+    color: "#ccc",
+  },
+
+  tickerPreview: {
+    marginTop: 18,
+    border:
+      "1px solid #292929",
+    background:
+      "#090909",
+    overflow:
+      "hidden",
+  },
+
+  tickerPreviewLabel: {
+    padding:
+      "10px 14px",
+    borderBottom:
+      "1px solid #292929",
+    fontSize: 9,
+    letterSpacing:
+      ".15em",
+    color: "#777",
+  },
+
+  tickerPreviewText: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    padding:
+      "16px 14px",
+    fontSize: 13,
+    lineHeight: 1.5,
+    color: "#f3f0e8",
   },
 
   uploadBox: {
